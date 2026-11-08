@@ -1,5 +1,9 @@
 # MNS — Sistem Bilgi Merkezi
 
+[![VirusTotal](https://img.shields.io/badge/VirusTotal-4%2F71%20(false%20positive)-c9a227)](https://www.virustotal.com/gui/file/27a9899928c5088a35e1d6844dde401fb4eb16f3037345c424f8e3f52501fa9c/detection)
+[![Sürüm](https://img.shields.io/badge/s%C3%BCr%C3%BCm-1.0.0-3ea6ff)](https://github.com/ZZXsatrancetbaba/MNS/releases)
+[![Lisans](https://img.shields.io/badge/lisans-MIT-2fbf71)](LICENSE)
+
 MNS, çalıştığı bilgisayarın **sistem / donanım / ağ** bilgilerini tek ekranda toplayan,
 kendi **yapım kaydını** gösteren ve **orijinallik doğrulaması** yapan Windows masaüstü
 uygulamasıdır.
@@ -76,6 +80,37 @@ Hazır EXE: [`dist/MNS.exe`](dist/MNS.exe) ve doğrulama dosyası
 
 Orijinallik kontrolü için **MNS.exe ile MNS.manifest.json aynı klasörde** olmalıdır.
 Manifest yoksa uygulama "DOGRULANAMADI" gösterir, yanlış özet varsa "DEGISTIRILMIS".
+
+## VirusTotal
+
+[![VirusTotal raporu](https://img.shields.io/badge/VirusTotal%20raporu-incele-394eff?logo=virustotal)](https://www.virustotal.com/gui/file/27a9899928c5088a35e1d6844dde401fb4eb16f3037345c424f8e3f52501fa9c/detection)
+
+`dist/MNS.exe` (SHA-256 `27a9899928c5088a35e1d6844dde401fb4eb16f3037345c424f8e3f52501fa9c`) taraması:
+
+**4 / 71 motor işaretledi, 67 motor temiz buldu.**
+
+| Motor | Sonuç |
+| --- | --- |
+| Bkav Pro | `W32.Malware.B97D5017` |
+| Microsoft | `Trojan:Win32/Wacatac.B!ml` |
+| SecureAge | `Malicious` |
+| Skyhigh (SWG) | `BehavesLike.Win64.Backdoor.rc` |
+
+> **Neden?** Dosya dijital imzalı değil ve PyInstaller'ın `--onefile` paketlemesi kendi
+> kendini açan sıkıştırılmış bir yürütülebilir üretiyor. Bu yapı, Heuristic/ML tabanlı
+> motorlarda (özellikle `Wacatac.B!ml` ve `BehavesLike.*`) yaygın olarak **yanlış pozitif**
+> veriyor. Bitdefender, ESET-NOD32, Avast, AVG, Avira, Fortinet, Google, CrowdStrike,
+> ClamAV, DrWeb, Emsisoft, AhnLab, Arcabit, Ikarus ve diğer 60+ motor temiz sonuç verdi.
+
+Kendi taraman / doğrulaman için:
+
+```powershell
+certutil -hashfile MNS.exe SHA256
+# 27a9899928c5088a35e1d6844dde401fb4eb16f3037345c424f8e3f52501fa9c
+```
+
+Kaynak kodu okuyup kendin derleyebilirsin (`python build.py`) — depodaki `app.py`, `core.py`
+tamamen okunabilir ve harici ağ bağlantısı kurmaz.
 
 ## Kaynaktan çalıştırma
 
