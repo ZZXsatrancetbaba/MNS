@@ -1,0 +1,18 @@
+# Sanal ortam / derleme artiklari
+.venv/
+venv/
+build/
+__pycache__/
+*.pyc
+*.pyo
+*.spec.bak
+
+# Gunlukler
+logs/
+*.log
+
+# Gecici dosyalar
+*.tmp
+*.bak
+Thumbs.db
+desktop.ini

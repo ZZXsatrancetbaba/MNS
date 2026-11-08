@@ -1,0 +1,19 @@
+{
+  "app": "MNS",
+  "version": "1.0.0",
+  "build_id": "808600B7",
+  "build_date": "08.11.2026 17:53:46",
+  "build_utc": "2026-11-08T14:53:46Z",
+  "git_commit": "yok",
+  "exe": "MNS.exe",
+  "exe_size_bytes": 13361146,
+  "sha256": "715d5d70f7763e0c5b267c73e6f962c5308615e6185283dd7902893e5c2a08f7",
+  "algorithm": "sha256",
+  "created_at": "2026-11-08T14:54:21Z",
+  "python": "3.12.8",
+  "source_sha256": {
+    "app.py": "0795a753d800c1df2bd7f67bb5d247af39bb9343274210cfd81342a15e3a2969",
+    "core.py": "d041a87537671449d6901ce1f3044898b7a641604cd452cee93c2831251f76b8",
+    "build_info.py": "e5f30c70e6f7715f82ec1bcb2fc79db66bbba5930552caf964bcf30612d6efb9"
+  }
+}

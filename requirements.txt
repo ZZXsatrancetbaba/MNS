@@ -1,0 +1,4 @@
+# MNS calisma ve derleme gereksinimleri
+psutil==7.2.2
+pillow==13.0.0
+pyinstaller==6.22.3
