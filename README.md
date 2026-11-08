@@ -4,6 +4,10 @@
 [![Sürüm](https://img.shields.io/badge/s%C3%BCr%C3%BCm-1.0.0-3ea6ff)](https://github.com/ZZXsatrancetbaba/MNS/releases)
 [![Lisans](https://img.shields.io/badge/lisans-MIT-2fbf71)](LICENSE)
 
+> **Antivirüs / SmartScreen uyarısı görürsen:** dosya dijital imzalı değil ve PyInstaller
+> `--onefile` ile paketlendiği için birkaç motor yanlış pozitif verebiliyor. Ayrıntı ve
+> kanıt: [VirusTotal](#virustotal).
+
 MNS, çalıştığı bilgisayarın **sistem / donanım / ağ** bilgilerini tek ekranda toplayan,
 kendi **yapım kaydını** gösteren ve **orijinallik doğrulaması** yapan Windows masaüstü
 uygulamasıdır.
@@ -101,6 +105,12 @@ Manifest yoksa uygulama "DOGRULANAMADI" gösterir, yanlış özet varsa "DEGISTI
 > motorlarda (özellikle `Wacatac.B!ml` ve `BehavesLike.*`) yaygın olarak **yanlış pozitif**
 > veriyor. Bitdefender, ESET-NOD32, Avast, AVG, Avira, Fortinet, Google, CrowdStrike,
 > ClamAV, DrWeb, Emsisoft, AhnLab, Arcabit, Ikarus ve diğer 60+ motor temiz sonuç verdi.
+
+**Kanıt:** aynı PyInstaller ayarlarıyla derlenmiş, içinde sadece `print("merhaba")` olan
+7,3 MB'lık bir test dosyası da **4/70** alıyor ve işaretleyen motorlar bu sefer farklı
+(DeepInstinct, SecureAge, Skyhigh) — Microsoft o dosyaya temiz dedi:
+[hello.exe raporu](https://www.virustotal.com/gui/file/a42839b83c0e6b535035de3a4534d0af2b6cf4399cdab04113f5ce743f743fc6/detection).
+Yani tetiklenen şey kod değil, **paketleme biçimi** (imzasız, sıkıştırılmış, kendi kendini açan exe).
 
 Kendi taraman / doğrulaman için:
 
