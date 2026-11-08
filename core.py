@@ -129,6 +129,12 @@ def sha256_file(path: Path, chunk: int = 1024 * 1024) -> str:
     return digest.hexdigest()
 
 
+def sha256_source(path: Path) -> str:
+    """Kaynak dosya ozeti: satir sonlari LF'e normalize edilir (git ile uyumlu)."""
+    data = path.read_bytes().replace(b"\r\n", b"\n")
+    return hashlib.sha256(data).hexdigest()
+
+
 # ------------------------------------------------------------------- logging
 
 _LOG_RING: deque[str] = deque(maxlen=1000)
@@ -277,7 +283,7 @@ def verify_integrity() -> dict:
                 if not path.exists():
                     mismatches.append(name)
                     continue
-                if sha256_file(path) != expected_hash:
+                if sha256_source(path) != expected_hash:
                     mismatches.append(name)
             result["expected"] = str(manifest.get("sha256", ""))
             if not files:

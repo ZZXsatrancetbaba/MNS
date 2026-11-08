@@ -46,6 +46,11 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def sha256_source(path: Path) -> str:
+    """Kaynak ozeti: satir sonlari LF'e normalize edilerek hesaplanir (git ile uyumlu)."""
+    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+
+
 def read_build_info() -> dict:
     data: dict = {}
     path = ROOT / "build_info.py"
@@ -146,7 +151,7 @@ def step_manifest(info: dict) -> None:
     for name in ("app.py", "core.py", "build_info.py"):
         path = ROOT / name
         if path.exists():
-            sources[name] = sha256(path)
+            sources[name] = sha256_source(path)
 
     manifest = {
         "app": APP_NAME,
