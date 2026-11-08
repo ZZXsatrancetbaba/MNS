@@ -10,6 +10,24 @@ uygulamasıdır.
 - Sürüm: **1.0.0**
 - Yapım tarihi: aşağıdaki tabloda (çalıştırınca da görünür)
 
+## Ekran görüntüsü
+
+![MNS arayüzü](screenshots/mns-arayuz.png)
+
+## Yapım bilgileri
+
+| Alan | Değer |
+| --- | --- |
+| Program | MNS — Sistem Bilgi Merkezi |
+| Sürüm | 1.0.0 |
+| Geliştirici | tekinbedirhan507-hub |
+| Python | 3.12.8 |
+| PyInstaller | 6.22.3 (--onefile --windowed) |
+| Yapım tarihi / saati | 08.11.2026 |
+| EXE boyutu | ~12.7 MB |
+| Dijital imza | Yok (NotSigned) |
+| Doğrulama | SHA-256 + `MNS.manifest.json` |
+
 ## Özellikler
 
 **Program / Orijinallik sekmesi**
@@ -44,6 +62,7 @@ uygulamasıdır.
 - `F5` yenile, `Ctrl+S` raporu kaydet, `Ctrl+C` tüm raporu panoya kopyala
 - Satıra çift tıklayınca o satır panoya kopyalanır
 - Koyu tema, sekmeli arayüz, durum çubuğunda orijinallik göstergesi
+- Yüksek DPI ekranlarda bulanıklık olmaması için DPI farkındalığı (ölçekli arayüz)
 - Komut satırı: `MNS.exe --rapor -o rapor.txt` (arayüz açmadan metin rapor)
 
 ## İndirme / Çalıştırma
@@ -116,6 +135,8 @@ MNS/
 ├─ dist/
 │  ├─ MNS.exe              # derlenmiş uygulama
 │  └─ MNS.manifest.json    # orijinallik referansı (SHA-256)
+├─ screenshots/
+│  └─ mns-arayuz.png       # arayüz görüntüsü
 └─ .gitignore
 ```
 

@@ -10,6 +10,8 @@ Calistirma:
 
 from __future__ import annotations
 
+import ctypes
+import os
 import sys
 import threading
 import tkinter as tk
@@ -29,20 +31,44 @@ WARN = "#ffb020"
 ERR = "#ff5566"
 
 SECTION_TITLES = {
-    "program": "PROGRAM / ORJINALLIK",
-    "sistem": "SISTEM",
+    "program": "PROGRAM / ORİJİNALLİK",
+    "sistem": "SİSTEM",
     "donanim": "DONANIM",
-    "ag": "AG",
+    "ag": "AĞ",
 }
+
+# Sekme basliklari (basliklarin buyuk harfli hali .title() ile bozulmasin diye ayri)
+TAB_TITLES = {
+    "program": "Program / Orijinallik",
+    "sistem": "Sistem",
+    "donanim": "Donanım",
+    "ag": "Ağ",
+}
+
+ORIGINAL_STATUSES = ("ORİJİNAL", "ORJİNAL")
+
+
+def enable_dpi_awareness() -> None:
+    """Yuksek DPI ekranlarda arayuzun bulanik olmamasini saglar."""
+    if os.name != "nt":
+        return
+    try:
+        ctypes.windll.shcore.SetProcessDpiAwareness(1)
+    except Exception:
+        try:
+            ctypes.windll.user32.SetProcessDPIAware()
+        except Exception:
+            pass
 
 
 class MNSCard(ttk.Frame):
     """Bir bilgi bolumu (baslik + iki kolonlu tablo)."""
 
-    def __init__(self, master, title: str, accent: str = ACCENT) -> None:
+    def __init__(self, master, title: str, accent: str = ACCENT, scale: float = 1.0) -> None:
         super().__init__(master, style="Card.TFrame")
         self.title = title
         self.accent = accent
+        self.scale = scale
 
         header = ttk.Frame(self, style="Card.TFrame")
         header.pack(fill="x", padx=14, pady=(10, 4))
@@ -54,11 +80,14 @@ class MNSCard(ttk.Frame):
         body = ttk.Frame(self, style="Card.TFrame")
         body.pack(fill="both", expand=True, padx=10, pady=(0, 10))
 
-        self.tree = ttk.Treeview(body, columns=("deger",), show="tree headings", height=8)
+        self.tree = ttk.Treeview(body, columns=("deger",), show="tree headings",
+                                 height=int(8))
         self.tree.heading("#0", text="Alan")
-        self.tree.heading("deger", text="Deger")
-        self.tree.column("#0", width=230, minwidth=170, stretch=False)
-        self.tree.column("deger", width=520, minwidth=240, stretch=True)
+        self.tree.heading("deger", text="Değer")
+        self.tree.column("#0", width=int(230 * self.scale), minwidth=int(170 * self.scale),
+                         stretch=False)
+        self.tree.column("deger", width=int(520 * self.scale), minwidth=int(240 * self.scale),
+                         stretch=True)
 
         scroll = ttk.Scrollbar(body, orient="vertical", command=self.tree.yview)
         self.tree.configure(yscrollcommand=scroll.set)
@@ -85,9 +114,9 @@ class MNSCard(ttk.Frame):
                 continue
             tags = ["odd" if index % 2 else "even"]
             if label in ("Orijinal mi?",):
-                tags.append("ok" if str(value).startswith(("ORIJINAL", "ORJINAL"))
+                tags.append("ok" if str(value).startswith(ORIGINAL_STATUSES)
                             else ("bad" if value else "warn"))
-            if label in ("Dogrulama notu", "Beklenen SHA-256") and index % 2 == 0:
+            if label in ("Doğrulama notu", "Beklenen SHA-256") and index % 2 == 0:
                 tags.append("note")
             self.tree.insert("", "end", text=f" {label}", values=(f" {value}",), tags=tuple(tags))
             index += 1
@@ -108,8 +137,9 @@ class MNSApp(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
         self.title(f"{core.APP_NAME} v{core.VERSION} - Sistem Bilgi Merkezi")
-        self.geometry("1040x720")
-        self.minsize(880, 600)
+        self.scale = self._detect_scale()
+        self.geometry(f"{int(1040 * self.scale)}x{int(720 * self.scale)}")
+        self.minsize(int(880 * self.scale), int(600 * self.scale))
         self.configure(bg=BG)
 
         self._set_icon()
@@ -122,6 +152,15 @@ class MNSApp(tk.Tk):
         self.refresh()
 
     # ------------------------------------------------------------- gorunum
+    def _detect_scale(self) -> float:
+        """Sistem DPI olcegi (96 dpi = 1.0)."""
+        try:
+            dpi = self.winfo_fpixels("1i")
+            self.tk.call("tk", "scaling", dpi / 72.0)
+            return max(1.0, round(dpi / 96.0, 2))
+        except Exception:
+            return 1.0
+
     def _set_icon(self) -> None:
         for candidate in (
             core.resource_path("assets/mns.ico"),
@@ -169,7 +208,7 @@ class MNSApp(tk.Tk):
                   background=[("selected", BG_CARD)],
                   foreground=[("selected", ACCENT)])
         style.configure("Treeview", background=BG_CARD, fieldbackground=BG_CARD,
-                        foreground=FG, borderwidth=0, rowheight=24)
+                        foreground=FG, borderwidth=0, rowheight=int(24 * self.scale))
         style.configure("Treeview.Heading", background=BG_ALT, foreground=FG_DIM,
                         borderwidth=0, font=("Segoe UI Semibold", 9))
         style.map("Treeview", background=[("selected", "#2b3a55")])
@@ -189,7 +228,7 @@ class MNSApp(tk.Tk):
                   padding=(8, 3)).pack(side="left", padx=(6, 0), pady=(4, 0))
         ttk.Label(title_row, text=f"  build {core.BUILD_ID}", style="Sub.TLabel").pack(
             side="left", pady=(6, 0))
-        ttk.Label(left, text="Sistem bilgileri, yapim kaydi ve orijinallik dogrulamasi",
+        ttk.Label(left, text="Sistem bilgileri, yapım kaydı ve orijinallik doğrulaması",
                   style="Sub.TLabel").pack(anchor="w", pady=(2, 0))
 
         buttons = ttk.Frame(header)
@@ -197,7 +236,7 @@ class MNSApp(tk.Tk):
         ttk.Button(buttons, text="Yenile (F5)", style="Accent.TButton",
                    command=self.refresh).pack(side="left", padx=4)
         ttk.Button(buttons, text="Raporu kaydet", command=self.save_report).pack(side="left", padx=4)
-        ttk.Button(buttons, text="Gunluk klasoru", command=self.open_log_folder).pack(side="left", padx=4)
+        ttk.Button(buttons, text="Günlük klasörü", command=self.open_log_folder).pack(side="left", padx=4)
 
         self.notebook = ttk.Notebook(self)
         self.notebook.pack(fill="both", expand=True, padx=18, pady=(6, 8))
@@ -205,12 +244,12 @@ class MNSApp(tk.Tk):
         self.cards: dict[str, MNSCard] = {}
         accents = {"program": ACCENT, "sistem": "#8f7bff", "donanim": OK, "ag": WARN}
         for key, title in SECTION_TITLES.items():
-            card = MNSCard(self.notebook, title, accents[key])
-            self.notebook.add(card, text=f"  {title.title()}  ")
+            card = MNSCard(self.notebook, title, accents[key], scale=self.scale)
+            self.notebook.add(card, text=f"  {TAB_TITLES[key]}  ")
             self.cards[key] = card
 
         log_page = ttk.Frame(self.notebook, style="Card.TFrame")
-        self.notebook.add(log_page, text="  Gunluk  ")
+        self.notebook.add(log_page, text="  Günlük  ")
         self.log_text = tk.Text(log_page, bg=BG_CARD, fg=FG, insertbackground=FG,
                                 relief="flat", wrap="none", font=("Consolas", 9),
                                 padx=12, pady=10, height=20)
@@ -226,7 +265,7 @@ class MNSApp(tk.Tk):
 
         status = ttk.Frame(self, style="TFrame")
         status.pack(fill="x", side="bottom")
-        self.status_var = tk.StringVar(value="Hazir")
+        self.status_var = tk.StringVar(value="Hazır")
         self.integrity_var = tk.StringVar(value="Orijinallik: kontrol ediliyor...")
         ttk.Label(status, textvariable=self.status_var, style="Status.TLabel",
                   padding=(18, 6)).pack(side="left")
@@ -234,7 +273,7 @@ class MNSApp(tk.Tk):
                                          style="Status.TLabel", padding=(18, 6))
         self.integrity_label.pack(side="right")
 
-        self.bind("<<Status>>", lambda _e: self.status_var.set("Satir panoya kopyalandi"))
+        self.bind("<<Status>>", lambda _e: self.status_var.set("Satır panoya kopyalandı"))
 
     def _bind_keys(self) -> None:
         self.bind("<F5>", lambda _e: self.refresh())
@@ -243,7 +282,7 @@ class MNSApp(tk.Tk):
 
     # -------------------------------------------------------------- aksiyon
     def refresh(self) -> None:
-        self.status_var.set("Bilgiler toplaniyor...")
+        self.status_var.set("Bilgiler toplanıyor...")
         for card in self.cards.values():
             for item in card.tree.get_children():
                 card.tree.delete(item)
@@ -256,7 +295,7 @@ class MNSApp(tk.Tk):
             core.log("INFO", "Bilgiler yenilendi")
             self.after(0, lambda: self._apply(data, integrity))
         except Exception as exc:  # pragma: no cover
-            core.log("ERROR", f"Bilgi toplama hatasi: {exc}")
+            core.log("ERROR", f"Bilgi toplama hatası: {exc}")
             self.after(0, lambda: self._fail(exc))
 
     def _apply(self, data: dict, integrity: dict) -> None:
@@ -264,21 +303,21 @@ class MNSApp(tk.Tk):
             card.set_rows(data.get(key, []))
         status = str(integrity.get("status", "?"))
         self.integrity_var.set(f"Orijinallik: {status}")
-        if status.startswith("ORIJINAL") or status.startswith("ORJINAL"):
+        if status.startswith(ORIGINAL_STATUSES):
             self.integrity_label.configure(foreground=OK)
-        elif status == "DOGRULANAMADI":
+        elif status == "DOĞRULANAMADI":
             self.integrity_label.configure(foreground=WARN)
         else:
             self.integrity_label.configure(foreground=ERR)
         self.status_var.set(
-            f"Son guncelleme: {core.datetime.now():%H:%M:%S} | "
-            f"Gunluk: {core.LOG_FILE}"
+            f"Son güncelleme: {core.datetime.now():%H:%M:%S} | "
+            f"Günlük: {core.LOG_FILE}"
         )
         self._refresh_log()
 
     def _fail(self, exc: Exception) -> None:
         self.status_var.set(f"Hata: {exc}")
-        messagebox.showerror(core.APP_NAME, f"Bilgiler alinamadi:\n{exc}")
+        messagebox.showerror(core.APP_NAME, f"Bilgiler alınamadı:\n{exc}")
 
     def _refresh_log(self) -> None:
         self.log_text.configure(state="normal")
@@ -295,7 +334,7 @@ class MNSApp(tk.Tk):
         text = core.report_text()
         self.clipboard_clear()
         self.clipboard_append(text)
-        self.status_var.set("Tum rapor panoya kopyalandi")
+        self.status_var.set("Tüm rapor panoya kopyalandı")
 
     def save_report(self) -> None:
         default = core.report_path()
@@ -304,7 +343,7 @@ class MNSApp(tk.Tk):
             defaultextension=".txt",
             initialdir=str(default.parent),
             initialfile=default.name,
-            filetypes=[("Metin dosyasi", "*.txt"), ("Tum dosyalar", "*.*")],
+            filetypes=[("Metin dosyası", "*.txt"), ("Tüm dosyalar", "*.*")],
         )
         if not path:
             return
@@ -326,7 +365,7 @@ class MNSApp(tk.Tk):
 
             os.startfile(str(core.LOG_DIR))  # type: ignore[attr-defined]
         except Exception as exc:
-            messagebox.showwarning(core.APP_NAME, f"Klasor acilamadi:\n{exc}")
+            messagebox.showwarning(core.APP_NAME, f"Klasör açılamadı:\n{exc}")
 
 
 def console_mode(output: str | None) -> int:
@@ -339,8 +378,8 @@ def console_mode(output: str | None) -> int:
     print(text)
     if output:
         Path(output).write_text(text, encoding="utf-8")
-        print(f"\nRapor yazildi: {output}")
-    core.log("INFO", "Konsol modunda rapor uretildi")
+        print(f"\nRapor yazıldı: {output}")
+    core.log("INFO", "Konsol modunda rapor üretildi")
     return 0
 
 
@@ -356,13 +395,14 @@ def main(argv: list[str] | None = None) -> int:
         print(f"{core.APP_NAME} v{core.VERSION} (build {core.BUILD_ID}, {core.BUILD_DATE})")
         return 0
 
+    enable_dpi_awareness()
     app = MNSApp()
     try:
         app.mainloop()
     except KeyboardInterrupt:
         pass
     finally:
-        core.log("INFO", "Uygulama kapatildi")
+        core.log("INFO", "Uygulama kapatıldı")
     return 0
 
 

@@ -112,7 +112,7 @@ def format_uptime(seconds: float) -> str:
     minutes, secs = divmod(rest, 60)
     parts = []
     if days:
-        parts.append(f"{days} gun")
+        parts.append(f"{days} gün")
     if hours:
         parts.append(f"{hours} saat")
     if minutes:
@@ -167,10 +167,10 @@ def init_logging() -> Path:
 
     LOG_FILE = LOG_DIR / f"mns_{datetime.now():%Y-%m-%d}.log"
     log("INFO", "-" * 66)
-    log("INFO", f"{APP_NAME} v{VERSION} baslatildi (build {BUILD_ID})")
-    log("INFO", f"Yapim tarihi : {BUILD_DATE} {BUILD_TIME}")
-    log("INFO", f"Calisma modu : {'EXE (paketlenmis)' if is_frozen() else 'Kaynak (python)'}")
-    log("INFO", f"Gunluk dosya : {LOG_FILE}")
+    log("INFO", f"{APP_NAME} v{VERSION} başlatıldı (build {BUILD_ID})")
+    log("INFO", f"Yapım tarihi : {BUILD_DATE} {BUILD_TIME}")
+    log("INFO", f"Çalışma modu : {'EXE (paketlenmis)' if is_frozen() else 'Kaynak (python)'}")
+    log("INFO", f"Günlük dosya : {LOG_FILE}")
     return LOG_FILE
 
 
@@ -191,7 +191,7 @@ def log_tail(lines: int = 400) -> str:
     try:
         content = LOG_FILE.read_text(encoding="utf-8", errors="replace").splitlines()
     except Exception as exc:  # pragma: no cover
-        return f"Gunluk okunamadi: {exc}"
+        return f"Günlük okunamadı: {exc}"
     return "\n".join(content[-lines:])
 
 
@@ -204,7 +204,7 @@ def verify_integrity() -> dict:
     dosyasindaki beklenen ozeti karsilastirir.
     """
     result = {
-        "status": "BILINMIYOR",
+        "status": "BİLİNMİYOR",
         "original": None,
         "sha256": "",
         "expected": "",
@@ -227,7 +227,7 @@ def verify_integrity() -> dict:
         result["sha256"] = sha256_file(target)
     except Exception as exc:
         result["status"] = "HATA"
-        result["message"] = f"Dosya okunamadi: {exc}"
+        result["message"] = f"Dosya okunamadı: {exc}"
         log("ERROR", result["message"])
         return result
 
@@ -243,12 +243,12 @@ def verify_integrity() -> dict:
                 result["manifest_path"] = str(candidate)
                 break
             except Exception as exc:
-                log("WARN", f"Manifest okunamadi ({candidate}): {exc}")
+                log("WARN", f"Manifest okunamadı ({candidate}): {exc}")
 
     if manifest is None:
-        result["status"] = "DOGRULANAMADI"
+        result["status"] = "DOĞRULANAMADI"
         result["message"] = (
-            "MNS.manifest.json bulunamadi; ozet hesaplandi ancak referans deger yok."
+            "MNS.manifest.json bulunamadı; özet hesaplandı ancak referans değer yok."
         )
         log("WARN", result["message"])
     else:
@@ -257,18 +257,18 @@ def verify_integrity() -> dict:
             expected = str(manifest.get("sha256", "")).lower()
             result["expected"] = expected
             if not expected:
-                result["status"] = "DOGRULANAMADI"
-                result["message"] = "Manifest icinde sha256 alani yok."
+                result["status"] = "DOĞRULANAMADI"
+                result["message"] = "Manifest içinde sha256 alanı yok."
             elif expected == result["sha256"]:
-                result["status"] = "ORIJINAL"
+                result["status"] = "ORİJİNAL"
                 result["original"] = True
-                result["message"] = "EXE ozeti manifest ile birebir ayni. Dosya degistirilmemis."
-                log("INFO", "Orijinallik dogrulandi: ORIJINAL")
+                result["message"] = "EXE özeti manifest ile birebir aynı. Dosya değiştirilmemiş."
+                log("INFO", "Orijinallik doğrulandı: ORİJİNAL")
             else:
-                result["status"] = "DEGISTIRILMIS"
+                result["status"] = "DEĞİŞTİRİLMİŞ"
                 result["original"] = False
-                result["message"] = "EXE ozeti manifest ile uyusmuyor! Dosya degistirilmis olabilir."
-                log("ERROR", "Orijinallik dogrulanamadi: DEGISTIRILMIS")
+                result["message"] = "EXE özeti manifest ile uyuşmuyor! Dosya değiştirilmiş olabilir."
+                log("ERROR", "Orijinallik doğrulanamadı: DEĞİŞTİRİLMİŞ")
         else:
             files = manifest.get("source_sha256") or {}
             mismatches = []
@@ -281,18 +281,18 @@ def verify_integrity() -> dict:
                     mismatches.append(name)
             result["expected"] = str(manifest.get("sha256", ""))
             if not files:
-                result["status"] = "DOGRULANAMADI"
-                result["message"] = "Kaynak ozetleri manifest icinde yok."
+                result["status"] = "DOĞRULANAMADI"
+                result["message"] = "Kaynak özetleri manifest içinde yok."
             elif mismatches:
-                result["status"] = "DEGISTIRILMIS"
+                result["status"] = "DEĞİŞTİRİLMİŞ"
                 result["original"] = False
-                result["message"] = "Degisen kaynak dosyalar: " + ", ".join(sorted(mismatches))
+                result["message"] = "Değişen kaynak dosyalar: " + ", ".join(sorted(mismatches))
                 log("ERROR", result["message"])
             else:
-                result["status"] = "ORIJINAL (kaynak)"
+                result["status"] = "ORİJİNAL (kaynak)"
                 result["original"] = True
                 result["message"] = "Kaynak dosyalar manifest ile uyumlu."
-                log("INFO", "Orijinallik dogrulandi: kaynak dosyalar uyumlu")
+                log("INFO", "Orijinallik doğrulandı: kaynak dosyalar uyumlu")
 
     if is_frozen() and os.name == "nt":
         status = _ps(
@@ -311,33 +311,33 @@ def program_info() -> list[tuple[str, str]]:
     integrity = verify_integrity()
     exe = Path(sys.executable).resolve() if is_frozen() else Path(__file__).resolve()
     rows = [
-        ("Program adi", APP_NAME),
-        ("Aciklama", "Sistem bilgi ve orijinallik dogrulama araci"),
-        ("Surum", VERSION),
-        ("Build kimligi", BUILD_ID),
-        ("Yapim tarihi", BUILD_DATE),
-        ("Yapim saati", BUILD_TIME),
-        ("Yapim zamani (UTC)", BUILD_UTC or "-"),
+        ("Program adı", APP_NAME),
+        ("Açıklama", "Sistem bilgisi ve orijinallik doğrulama aracı"),
+        ("Sürüm", VERSION),
+        ("Build kimliği", BUILD_ID),
+        ("Yapım tarihi", BUILD_DATE),
+        ("Yapım saati", BUILD_TIME),
+        ("Yapım zamanı (UTC)", BUILD_UTC or "-"),
         ("Git commit", GIT_COMMIT),
-        ("Gelistirici", APP_AUTHOR),
+        ("Geliştirici", APP_AUTHOR),
         ("Depo", APP_REPO),
         ("-", "-"),
-        ("Calisma modu", "EXE (PyInstaller)" if is_frozen() else "Kaynak (.py)"),
+        ("Çalışma modu", "EXE (PyInstaller)" if is_frozen() else "Kaynak (.py)"),
         ("Dosya", exe.name),
         ("Dosya yolu", str(exe)),
         ("Dosya boyutu", human_bytes(integrity.get("size", 0))),
         ("SHA-256", integrity.get("sha256", "") or "-"),
         ("Beklenen SHA-256", integrity.get("expected", "") or "-"),
-        ("Manifest", integrity.get("manifest_path", "") or "bulunamadi"),
+        ("Manifest", integrity.get("manifest_path", "") or "bulunamadı"),
         ("Orijinal mi?", integrity.get("status", "?")),
-        ("Dogrulama notu", integrity.get("message", "")),
+        ("Doğrulama notu", integrity.get("message", "")),
     ]
     if integrity.get("authenticode"):
         rows.append(("Dijital imza", integrity["authenticode"]))
     rows += [
-        ("Python surumu", platform.python_version()),
+        ("Python sürümü", platform.python_version()),
         ("PyInstaller", _pyinstaller_version()),
-        ("Calistiran kullanici", getpass.getuser()),
+        ("Çalıştıran kullanıcı", getpass.getuser()),
     ]
     return rows
 
@@ -369,26 +369,26 @@ def system_info() -> list[tuple[str, str]]:
             win_ver = ""
 
     rows = [
-        ("Bilgisayar adi", socket.gethostname()),
-        ("Kullanici", getpass.getuser()),
-        ("Isletim sistemi", f"{platform.system()} {platform.release()}"),
-        ("Surum", platform.version()),
-        ("Windows surumu", win_ver or "-"),
-        ("Surum (edition)", getattr(platform, "win32_edition", lambda: "-")() if os.name == "nt" else "-"),
+        ("Bilgisayar adı", socket.gethostname()),
+        ("Kullanıcı", getpass.getuser()),
+        ("İşletim sistemi", f"{platform.system()} {platform.release()}"),
+        ("Sürüm", platform.version()),
+        ("Windows sürümü", win_ver or "-"),
+        ("Sürüm (edition)", getattr(platform, "win32_edition", lambda: "-")() if os.name == "nt" else "-"),
         ("Mimari", f"{platform.machine()} / {platform.architecture()[0]}"),
-        ("Islemci tanimi", uname.processor or platform.machine()),
+        ("İşlemci tanımı", uname.processor or platform.machine()),
         ("Python platformu", sys.platform),
         ("Python yolu", sys.executable),
-        ("Dil / bolge", f"{os.environ.get('LANG', '') or '-'} | {time.tzname[0] if time.tzname else '-'}"),
+        ("Dil / bölge", f"{os.environ.get('LANG', '') or '-'} | {time.tzname[0] if time.tzname else '-'}"),
         ("Saat dilimi", time.strftime("%Z %z")),
         ("Yerel saat", datetime.now().strftime("%d.%m.%Y %H:%M:%S")),
         ("UTC saat", datetime.now(timezone.utc).strftime("%d.%m.%Y %H:%M:%S")),
-        ("Sistem acilis zamani", datetime.fromtimestamp(boot).strftime("%d.%m.%Y %H:%M:%S") if boot else "-"),
-        ("Calisma suresi", format_uptime(time.time() - boot) if boot else "-"),
-        ("Ortam (venv)", "evet" if sys.prefix != getattr(sys, "base_prefix", sys.prefix) else "hayir"),
+        ("Sistem açılış zamanı", datetime.fromtimestamp(boot).strftime("%d.%m.%Y %H:%M:%S") if boot else "-"),
+        ("Çalışma süresi", format_uptime(time.time() - boot) if boot else "-"),
+        ("Ortam (venv)", "evet" if sys.prefix != getattr(sys, "base_prefix", sys.prefix) else "hayır"),
         ("venv yolu", sys.prefix),
-        ("Islem kimligi (PID)", str(os.getpid())),
-        ("Aktif is parcacigi", str(os.cpu_count() or "-")),
+        ("İşlem kimliği (PID)", str(os.getpid())),
+        ("Aktif iş parçacığı", str(os.cpu_count() or "-")),
     ]
     return rows
 
@@ -397,25 +397,25 @@ def hardware_info() -> list[tuple[str, str]]:
     rows: list[tuple[str, str]] = []
 
     cpu_name = _cim("Win32_Processor", "Name") or platform.processor() or platform.machine()
-    rows.append(("Islemci", cpu_name.strip()))
+    rows.append(("İşlemci", cpu_name.strip()))
 
     physical = _cim("Win32_Processor", "NumberOfCores")
     logical = _cim("Win32_Processor", "NumberOfLogicalProcessors")
-    rows.append(("Cekirdek (fiziksel / mantiksal)", f"{physical or '-'} / {logical or os.cpu_count()}"))
+    rows.append(("Çekirdek (fiziksel / mantıksal)", f"{physical or '-'} / {logical or os.cpu_count()}"))
 
     try:
         import psutil  # type: ignore
 
         freq = psutil.cpu_freq()
         if freq:
-            rows.append(("Islemci frekansi", f"{freq.current:.0f} MHz (max {freq.max:.0f} MHz)"))
+            rows.append(("İşlemci frekansı", f"{freq.current:.0f} MHz (max {freq.max:.0f} MHz)"))
         mem = psutil.virtual_memory()
         rows.append(("RAM toplam", human_bytes(mem.total)))
-        rows.append(("RAM kullanilabilir", human_bytes(mem.available)))
-        rows.append(("RAM kullanim orani", f"%{mem.percent}"))
+        rows.append(("RAM kullanılabilir", human_bytes(mem.available)))
+        rows.append(("RAM kullanım oranı", f"%{mem.percent}"))
         swap = psutil.swap_memory()
         rows.append(("Sanal bellek (swap)", f"{human_bytes(swap.used)} / {human_bytes(swap.total)}"))
-        rows.append(("Calisan islem sayisi", str(len(psutil.pids()))))
+        rows.append(("Çalışan işlem sayısı", str(len(psutil.pids()))))
 
         rows.append(("-", "-"))
         for part in psutil.disk_partitions(all=False):
@@ -426,22 +426,22 @@ def hardware_info() -> list[tuple[str, str]]:
             rows.append(
                 (
                     f"Disk {part.device} ({part.fstype or '?'})",
-                    f"{human_bytes(usage.used)} / {human_bytes(usage.total)} (%{usage.percent}) - bos {human_bytes(usage.free)}",
+                    f"{human_bytes(usage.used)} / {human_bytes(usage.total)} (%{usage.percent}) - boş {human_bytes(usage.free)}",
                 )
             )
     except Exception as exc:  # psutil yoksa
-        rows.append(("Donanim ayrintilari", f"psutil kullanilamadi: {exc}"))
+        rows.append(("Donanım ayrıntıları", f"psutil kullanılamadı: {exc}"))
 
     gpu = _cim("Win32_VideoController", "Name")
-    rows.append(("Ekran karti", gpu or "-"))
+    rows.append(("Ekran kartı", gpu or "-"))
 
     try:
         import tkinter as tk
 
         root = tk.Tk()
         root.withdraw()
-        rows.append(("Ekran cozunurlugu", f"{root.winfo_screenwidth()} x {root.winfo_screenheight()}"))
-        rows.append(("DPI olcegi", f"{round(root.winfo_fpixels('1i'))} dpi"))
+        rows.append(("Ekran çözünürlüğü", f"{root.winfo_screenwidth()} x {root.winfo_screenheight()}"))
+        rows.append(("DPI ölçeği", f"{round(root.winfo_fpixels('1i'))} dpi"))
         root.destroy()
     except Exception:
         pass
@@ -460,7 +460,7 @@ def hardware_info() -> list[tuple[str, str]]:
 
 
 def network_info() -> list[tuple[str, str]]:
-    rows: list[tuple[str, str]] = [("Ana makine adi", socket.gethostname())]
+    rows: list[tuple[str, str]] = [("Ana makine adı", socket.gethostname())]
     try:
         rows.append(("FQDN", socket.getfqdn()))
     except Exception:
@@ -484,13 +484,13 @@ def network_info() -> list[tuple[str, str]]:
                 elif getattr(psutil, "AF_LINK", None) and addr.family == psutil.AF_LINK:
                     rows.append((f"{name} (MAC)", addr.address))
         counters = psutil.net_io_counters()
-        rows.append(("Toplam gonderilen", human_bytes(counters.bytes_sent)))
-        rows.append(("Toplam alinan", human_bytes(counters.bytes_recv)))
+        rows.append(("Toplam gönderilen", human_bytes(counters.bytes_sent)))
+        rows.append(("Toplam alınan", human_bytes(counters.bytes_recv)))
     except Exception as exc:
-        rows.append(("Ag ayrintilari", f"psutil kullanilamadi: {exc}"))
+        rows.append(("Ağ ayrıntıları", f"psutil kullanılamadı: {exc}"))
 
     try:
-        rows.append(("Yerel IP (varsayilan rota)", socket.gethostbyname(socket.gethostname())))
+        rows.append(("Yerel IP (varsayılan rota)", socket.gethostbyname(socket.gethostname())))
     except Exception:
         pass
 
@@ -514,14 +514,14 @@ def report_text() -> str:
     data = all_info()
     lines = [
         "=" * 66,
-        f"{APP_NAME} - SISTEM RAPORU",
+        f"{APP_NAME} - SİSTEM RAPORU",
         "=" * 66,
     ]
     titles = {
-        "program": "PROGRAM / ORJINALLIK",
-        "sistem": "SISTEM",
+        "program": "PROGRAM / ORİJİNALLİK",
+        "sistem": "SİSTEM",
         "donanim": "DONANIM",
-        "ag": "AG",
+        "ag": "AĞ",
     }
     for key in ("program", "sistem", "donanim", "ag"):
         lines.append("")
@@ -536,8 +536,8 @@ def report_text() -> str:
             lines.append(f"{label:<{width}} : {value}")
     lines.append("")
     lines.append("=" * 66)
-    lines.append(f"Rapor zamani : {datetime.now():%d.%m.%Y %H:%M:%S}")
-    lines.append(f"Gunluk dosya : {LOG_FILE}")
+    lines.append(f"Rapor zamanı : {datetime.now():%d.%m.%Y %H:%M:%S}")
+    lines.append(f"Günlük dosya : {LOG_FILE}")
     lines.append("=" * 66)
     return "\n".join(lines)
 
