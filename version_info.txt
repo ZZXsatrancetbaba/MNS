@@ -21,7 +21,7 @@ VSVersionInfo(
          StringStruct('OriginalFilename', 'MNS.exe'),
          StringStruct('ProductName', 'MNS'),
          StringStruct('ProductVersion', '1.0.0'),
-         StringStruct('Comments', 'Yapim: 08.11.2026 17:53:46 | build 808600B7 | commit yok')])
+         StringStruct('Comments', 'Yapim: 08.11.2026 18:02:24 | build AE9405E7 | commit 3fdbf62')])
     ]),
     VarFileInfo([VarStruct('Translation', [1033, 1200])])
   ]
