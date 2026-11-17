@@ -28,7 +28,7 @@ uygulamasıdır.
 | --- | --- |
 | Program | MNS — Sistem Bilgi Merkezi |
 | Sürüm | 1.0.0 |
-| Geliştirici | tekinbedirhan507-hub |
+| Geliştirici | sifirbir |
 | Python | 3.12.8 |
 | PyInstaller | 6.22.3 (--onefile --windowed) |
 | Yapım tarihi / saati | 08.11.2026 |
